@@ -19,8 +19,13 @@ from parsers.info_parser import (
 from analyzers.resume_analyzer import analyze_resume
 from analyzers.jd_skill_extractor import extract_jd_skills
 from analyzers.jd_matcher import match_jd
+from services.ai_service import generate_resume_feedback
 
 import os
+from dotenv import load_dotenv
+
+# Load .env from the backend directory
+load_dotenv()
 
 app = FastAPI()
 
@@ -38,6 +43,13 @@ app.add_middleware(
 
 class JDRequest(BaseModel):
     jd_text: str
+
+class FeedbackRequest(BaseModel):
+    resume_text: str
+    jd_text: str
+    ats_score: int
+    matched_skills: list[str] = []
+    missing_skills: list[str] = []
 
 UPLOAD_FOLDER = "uploads"
 
@@ -404,3 +416,24 @@ async def match_jd_pdf(file: UploadFile = File(...)):
         },
         "match_result": match_result
     }
+
+
+# ─────────────────────────────────────────
+# AI FEEDBACK ENDPOINT
+# ─────────────────────────────────────────
+
+@app.post("/generate-feedback")
+def generate_feedback(data: FeedbackRequest):
+    """
+    Call OpenRouter to generate AI-powered resume feedback.
+    ATS scoring and skill matching are unaffected — this is purely additive.
+    Returns pros, cons, and suggestions even if AI fails (graceful fallback).
+    """
+    result = generate_resume_feedback(
+        resume_text    = data.resume_text,
+        jd_text        = data.jd_text,
+        ats_score      = data.ats_score,
+        matched_skills = data.matched_skills,
+        missing_skills = data.missing_skills
+    )
+    return result

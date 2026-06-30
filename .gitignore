@@ -53,6 +53,10 @@ backend/database/*.db
 .env.*
 *.env
 !.env.example
+backend/.env
+
+# Test / debug scripts (may contain hardcoded secrets)
+backend/test_openrouter.py
 
 # ============================================================
 #  IDE & Editors

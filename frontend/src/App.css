@@ -718,3 +718,243 @@ body {
 .fade-in {
   animation: fadeSlideIn 0.5s ease;
 }
+
+/* ─────────────────────────────────────────
+   AI Feedback Section
+───────────────────────────────────────── */
+
+/* Extra token overrides for AI section */
+:root {
+  --pros-color:        #22d98a;
+  --pros-bg:          rgba(34, 217, 138, 0.08);
+  --pros-border:      rgba(34, 217, 138, 0.2);
+
+  --cons-color:        #f0ab3d;
+  --cons-bg:          rgba(240, 171, 61, 0.08);
+  --cons-border:      rgba(240, 171, 61, 0.2);
+
+  --suggest-color:    #7c6aff;
+  --suggest-bg:       rgba(124, 106, 255, 0.08);
+  --suggest-border:   rgba(124, 106, 255, 0.2);
+}
+
+.ai-feedback-section {
+  margin-top: 40px;
+}
+
+.ai-feedback-header {
+  margin-bottom: 24px;
+}
+
+/* AI badge pill */
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-light);
+  border: 1px solid rgba(124, 106, 255, 0.25);
+  padding: 4px 12px;
+  border-radius: 99px;
+  margin-bottom: 12px;
+}
+
+.ai-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.8); }
+}
+
+.ai-feedback-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-h);
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+
+.ai-feedback-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Three-column grid */
+.ai-feedback-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .ai-feedback-grid { grid-template-columns: 1fr; }
+}
+
+/* Individual feedback card */
+.ai-feedback-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border-top-width: 2px;
+}
+
+.ai-feedback-card--pros        { border-top-color: var(--pros-color);    background: var(--pros-bg);     border-color: var(--pros-border); }
+.ai-feedback-card--cons        { border-top-color: var(--cons-color);    background: var(--cons-bg);     border-color: var(--cons-border); }
+.ai-feedback-card--suggestions { border-top-color: var(--suggest-color); background: var(--suggest-bg);  border-color: var(--suggest-border); }
+
+.ai-feedback-card__title {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.ai-feedback-card__icon {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.ai-feedback-card__icon--pros        { color: var(--pros-color); }
+.ai-feedback-card__icon--cons        { color: var(--cons-color); }
+.ai-feedback-card__icon--suggestions { color: var(--suggest-color); }
+
+.ai-feedback-card__count {
+  margin-left: auto;
+  background: var(--bg-card-alt);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 99px;
+  font-weight: 600;
+}
+
+/* Feedback list */
+.ai-feedback-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ai-feedback-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.ai-feedback-item__bullet {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: 6px;
+}
+
+.ai-feedback-item--pros .ai-feedback-item__bullet        { background: var(--pros-color); }
+.ai-feedback-item--cons .ai-feedback-item__bullet        { background: var(--cons-color); }
+.ai-feedback-item--suggestions .ai-feedback-item__bullet { background: var(--suggest-color); }
+
+.ai-feedback-empty {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Skeleton loader */
+.ai-feedback-card--skeleton {
+  border-top-color: var(--border-light);
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--border) 25%,
+    var(--border-light) 50%,
+    var(--border) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton--title       { height: 14px; width: 40%; margin-bottom: 4px; }
+.skeleton--line        { height: 13px; width: 100%; }
+.skeleton--line-short  { width: 70%; }
+
+/* Fallback banner */
+.ai-fallback-banner {
+  background: rgba(240, 171, 61, 0.08);
+  border: 1px solid rgba(240, 171, 61, 0.25);
+  color: var(--cons-color);
+  font-size: 13px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ai-fallback-banner code {
+  background: rgba(240, 171, 61, 0.15);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* AI unavailable card */
+.ai-unavailable-card {
+  text-align: center;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.ai-unavailable-icon {
+  font-size: 32px;
+  color: var(--cons-color);
+}
+
+.ai-unavailable-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.ai-unavailable-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+}

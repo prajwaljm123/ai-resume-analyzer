@@ -47,7 +47,7 @@ export default function JDInput({ onMatchResult, onAnalyzing, isResumeUploaded }
     try {
       const res = await api.post("/match-jd", { jd_text: jdText.trim() });
       setStatus("success");
-      onMatchResult(res.data);
+      onMatchResult(res.data, jdText.trim());
     } catch (err) {
       setStatus("error");
       setErrorMsg(
