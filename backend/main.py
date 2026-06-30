@@ -1,6 +1,8 @@
 from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from parsers.resume_parser import extract_text_from_pdf
+from parsers.jd_parser import extract_text_from_jd_pdf
 
 from parsers.section_parser import parse_sections
 
@@ -16,10 +18,23 @@ from parsers.info_parser import (
 )
 from analyzers.resume_analyzer import analyze_resume
 from analyzers.jd_skill_extractor import extract_jd_skills
+from analyzers.jd_matcher import match_jd
 
 import os
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class JDRequest(BaseModel):
     jd_text: str
@@ -266,17 +281,126 @@ def get_jd_skills():
         "skills": skills
     }
     
-@app.post("/submit-jd")
-def submit_jd(data: JDRequest):
 
-    categorized_skills = extract_jd_skills(data.jd_text)
 
-    all_skills = flatten_skills(categorized_skills)
+
+# ─────────────────────────────────────────
+# JD MATCHING ENDPOINTS
+# ─────────────────────────────────────────
+
+@app.post("/match-jd")
+def match_jd_text(data: JDRequest):
+    """
+    Accept JD as pasted text (from LinkedIn, Naukri, Indeed, etc.),
+    extract JD skills, then compare with uploaded resume skills.
+    """
+
+    # Get resume from uploads folder
+    resume_files = os.listdir(UPLOAD_FOLDER)
+
+    if not resume_files:
+        return {
+            "success": False,
+            "message": "No resume uploaded. Please upload a resume first via /upload-resume"
+        }
+
+    resume_pdf_path = os.path.join(UPLOAD_FOLDER, resume_files[0])
+    resume_text = extract_text_from_pdf(resume_pdf_path)
+
+    # Extract skills from resume
+    resume_skills = extract_skills(resume_text)
+
+    # Extract skills from JD text
+    jd_skills = extract_jd_skills(data.jd_text)
+
+    if not jd_skills:
+        return {
+            "success": False,
+            "message": "No recognizable skills found in the provided Job Description text."
+        }
+
+    # Run matcher
+    match_result = match_jd(resume_skills, jd_skills)
 
     return {
-        "skills": {
-            "categorized": categorized_skills,
-            "all": all_skills,
-            "total_skills_found": len(all_skills)
+        "success": True,
+        "input_type": "text",
+        "resume_file": resume_files[0],
+        "resume_skills": {
+            "categorized": resume_skills,
+            "all": flatten_skills(resume_skills),
+            "total": len(flatten_skills(resume_skills))
+        },
+        "jd_skills": {
+            "categorized": jd_skills,
+            "all": flatten_skills(jd_skills),
+            "total": len(flatten_skills(jd_skills))
+        },
+        "match_result": match_result
+    }
+
+
+@app.post("/match-jd-pdf")
+async def match_jd_pdf(file: UploadFile = File(...)):
+    """
+    Accept JD as a PDF upload, extract text + skills,
+    then compare with uploaded resume skills.
+    """
+
+    # Save JD PDF
+    jd_file_path = os.path.join(JD_FOLDER, file.filename)
+
+    with open(jd_file_path, "wb") as buffer:
+        buffer.write(await file.read())
+
+    # Get resume from uploads folder
+    resume_files = os.listdir(UPLOAD_FOLDER)
+
+    if not resume_files:
+        return {
+            "success": False,
+            "message": "No resume uploaded. Please upload a resume first via /upload-resume"
         }
+
+    resume_pdf_path = os.path.join(UPLOAD_FOLDER, resume_files[0])
+    resume_text = extract_text_from_pdf(resume_pdf_path)
+
+    # Extract text from JD PDF
+    jd_text = extract_text_from_jd_pdf(jd_file_path)
+
+    if not jd_text.strip():
+        return {
+            "success": False,
+            "message": "Could not extract text from the uploaded JD PDF."
+        }
+
+    # Extract skills from resume and JD
+    resume_skills = extract_skills(resume_text)
+    jd_skills = extract_jd_skills(jd_text)
+
+    if not jd_skills:
+        return {
+            "success": False,
+            "message": "No recognizable skills found in the uploaded JD PDF."
+        }
+
+    # Run matcher
+    match_result = match_jd(resume_skills, jd_skills)
+
+    return {
+        "success": True,
+        "input_type": "pdf",
+        "jd_file": file.filename,
+        "resume_file": resume_files[0],
+        "resume_skills": {
+            "categorized": resume_skills,
+            "all": flatten_skills(resume_skills),
+            "total": len(flatten_skills(resume_skills))
+        },
+        "jd_skills": {
+            "categorized": jd_skills,
+            "all": flatten_skills(jd_skills),
+            "total": len(flatten_skills(jd_skills))
+        },
+        "match_result": match_result
     }
