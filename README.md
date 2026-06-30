@@ -2,6 +2,14 @@
 
 A **full-stack ATS resume analyzer** built with **FastAPI + React + OpenRouter AI**. Upload your PDF resume, paste a job description, and get an instant ATS match score — plus AI-powered pros, cons, and improvement suggestions.
 
+<div align="center">
+  <img src="assets/Dashboard.png" alt="Dashboard" width="800"/>
+  <br/><br/>
+  <img src="assets/Ats_score.png" alt="ATS Match Score" width="800"/>
+  <br/><br/>
+  <img src="assets/Ai-Feedback.png" alt="AI Feedback" width="800"/>
+</div>
+
 ---
 
 ## ✨ Features
